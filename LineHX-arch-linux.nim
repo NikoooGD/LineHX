@@ -59,7 +59,6 @@ else:
 # plugins
 for url in [
   "https://github.com/Ra77a3l3-jar/forest.hx.git",
-  "https://github.com/gllms/streal.hx.git",
   "https://github.com/mattwparas/steel-pty.git",
   "https://github.com/Ra77a3l3-jar/trail.hx.git"
 ]:
