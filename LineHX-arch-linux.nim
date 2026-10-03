@@ -124,7 +124,6 @@ k = ":sh pkill kitty >/dev/null 2>&1"
 const initScm = """(require "forest/forest.scm")
 (forest-configure! 'left)
 (require "streal/streal.scm")
-(require "steel-pty/term.scm")
 (require "trail/trail.scm")
 """
 
