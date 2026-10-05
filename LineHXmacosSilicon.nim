@@ -1,4 +1,3 @@
-
 import os, osproc, strutils, times
 
 proc run(cmd: string): int =
@@ -11,50 +10,34 @@ proc backup(p: string) =
     echo "Backup ", p, " -> ", b
     if fileExists(p): moveFile(p, b) else: moveDir(p, b)
 
-let cfgDir =
-  when defined(macosx):
-    expandTilde("~/.config/helix")
-  elif defined(windows):
-    getEnv("APPDATA") / "helix"
-  else:
-    expandTilde("~/.config/helix")
+let cfgDir = expandTilde("~/.config/helix")
 
 echo "LineHX macOS Installer"
 echo "Target: ", cfgDir
 echo "Continue? y/n"
 if readLine(stdin).strip().toLower()!= "y": quit("Aborted", 0)
 
-echo ""
-echo "How to install?"
-echo "1. Clean - backup existing and overwrite (recommended)"
-echo "2. Addon - keep existing, only add if missing"
-echo "3. Cancel"
-let choice = readLine(stdin).strip()
-if choice == "3": quit("Cancelled", 0)
-let isClean = choice == "1"
+echo "\n1. Clean 2. Addon 3. Cancel"
+let isClean = readLine(stdin).strip() == "1"
 
-# ── macOS checks ──
-when defined(macosx) or not defined(windows):
-  if findExe("brew") == "":
-    quit("brew not found. Install from https://brew.sh", 1)
+# ── Check hx is steel ──
+if findExe("hx")!= "":
+  let isSteel = execCmdEx("hx --version 2>&1").output.toLower().contains("steel") or execCmdEx("hx --health 2>&1").output.contains("steel")
+  echo "[✓] hx found: ", findExe("hx")
+  if not isSteel:
+    echo "[!] Warning: you have vanilla helix from brew, not helix-steel"
+    echo " Plugins need steel. Installing steel hx..."
+    discard run("cargo install --git https://github.com/mattwparas/helix --branch steel-event-system helix-term --bin hx --locked")
+else:
+  echo "[!] hx not found"
+  discard run("cargo install --git https://github.com/mattwparas/helix --branch steel-event-system helix-term --bin hx --locked")
 
-  if findExe("hx") == "":
-    echo "[!] hx not found, installing steel build via cargo..."
-    if findExe("cargo") == "":
-      echo "Installing rustup..."
-      discard run("curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y")
-    # brew deps for helix
-    discard run("brew install git")
-    if run("cargo install --git https://github.com/mattwparas/helix --branch steel-event-system helix-term --bin hx --locked")!= 0:
-      quit("hx build failed", 1)
-  else:
-    echo "[✓] hx found: ", findExe("hx")
-
-  if findExe("steel") == "":
-    discard run("cargo install steel --locked")
-
+# ── FIXED: forge install ──
 if findExe("forge") == "":
-  discard run("cargo install forge-hx --locked")
+  echo "Installing forge..."
+  if run("cargo install --git https://github.com/nik-rev/forge --locked")!= 0:
+    # fallback old name
+    discard run("cargo install forge --locked")
 
 for url in [
   "https://github.com/Ra77a3l3-jar/forest.hx.git",
@@ -67,49 +50,11 @@ createDir(cfgDir)
 if isClean:
   backup(cfgDir / "config.toml")
   backup(cfgDir / "init.scm")
-  if fileExists(cfgDir / "helix.scm"): removeFile(cfgDir / "helix.scm")
 
 const configToml = """theme = "astrodark"
-
-[keys.insert]
-up = "no_op"
-down = "no_op"
-left = "no_op"
-right = "no_op"
-
-[keys.normal]
-up = "no_op"
-down = "no_op"
-left = "no_op"
-right = "no_op"
-
 [editor]
-gutters = ["diagnostics", "diff", "line-numbers", "spacer"]
 line-number = "absolute"
 cursorline = true
-color-modes = true
-auto-info = true
-
-[editor.cursor-shape]
-normal = "block"
-insert = "bar"
-select = "underline"
-
-[keys.normal.space]
-e = ":forest-open"
-h = ":streal-open"
-r = ":trail-open"
-q = ":q"
-w = ":w"
-n = "goto_next_change"
-N = "goto_prev_change"
-
-[keys.normal.space.g]
-g = ":sh lazygit"
-b = ":sh git blame -L %{cursor_line},%{cursor_line} %{buffer_name}"
-d = ":sh git diff %{buffer_name}"
-s = ":sh git status -s"
-l = ":sh git log --oneline -20"
 """
 
 const initScm = """(require "forest/forest.scm")
@@ -120,9 +65,7 @@ const initScm = """(require "forest/forest.scm")
 
 if isClean or not fileExists(cfgDir / "config.toml"):
   writeFile(cfgDir / "config.toml", configToml)
-  echo "Wrote ~/.config/helix/config.toml"
 if isClean or not fileExists(cfgDir / "init.scm"):
   writeFile(cfgDir / "init.scm", initScm)
-  echo "Wrote ~/.config/helix/init.scm"
 
-echo "\nDone. Run `hx`"
+echo "\nDone. Run hx"
