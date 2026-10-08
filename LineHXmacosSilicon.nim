@@ -10,62 +10,63 @@ proc backup(p: string) =
     echo "Backup ", p, " -> ", b
     if fileExists(p): moveFile(p, b) else: moveDir(p, b)
 
+# embed configs at compile time — no external files needed
+const ConfigToml = staticRead("assets/config.toml")
+const InitScm = staticRead("assets/init.scm")
+const Plugins = [
+  "https://github.com/Ra77a3l3-jar/forest.hx.git",
+  "https://github.com/gllms/streal.hx.git",
+  "https://github.com/helix-steel/steel-pty.git",
+  "https://github.com/Ra77a3l3-jar/trail.hx.git",
+  "https://github.com/HeitorAugustoLN/showkeys.hx.git"
+]
+
 let cfgDir = expandTilde("~/.config/helix")
 
-echo "LineHX macOS Installer"
+echo "LineHX macOS Silicon (M1-M5) Installer"
 echo "Target: ", cfgDir
+
 echo "Continue? y/n"
 if readLine(stdin).strip().toLower()!= "y": quit("Aborted", 0)
 
 echo "\n1. Clean 2. Addon 3. Cancel"
-let isClean = readLine(stdin).strip() == "1"
+let choice = readLine(stdin).strip()
+if choice == "3": quit("Cancelled", 0)
+let isClean = choice == "1"
 
-# ── Check hx is steel ──
-if findExe("hx")!= "":
-  let isSteel = execCmdEx("hx --version 2>&1").output.toLower().contains("steel") or execCmdEx("hx --health 2>&1").output.contains("steel")
-  echo "[✓] hx found: ", findExe("hx")
-  if not isSteel:
-    echo "[!] Warning: you have vanilla helix from brew, not helix-steel"
-    echo " Plugins need steel. Installing steel hx..."
-    discard run("cargo install --git https://github.com/mattwparas/helix --branch steel-event-system helix-term --bin hx --locked")
+# 1. Ensure rust
+if findExe("cargo") == "":
+  echo "Installing rust..."
+  discard run("brew install rust")
+
+# 2. Ensure helix-steel (v1ctorio) not vanilla brew
+let hasSteel = findExe("hx")!= "" and execCmdEx("hx --health 2>&1").output.toLower().contains("steel")
+if not hasSteel:
+  echo "Installing v1ctorio/helix-steel (this takes ~8 mins on M5)..."
+  discard run("brew install git")
+  discard run("rm -rf /tmp/helix-steel && git clone https://github.com/v1ctorio/helix-steel.git /tmp/helix-steel && cd /tmp/helix-steel && cargo xtask steel")
+  echo "export PATH=\"$HOME/.cargo/bin:$PATH\""
 else:
-  echo "[!] hx not found"
-  discard run("cargo install --git https://github.com/mattwparas/helix --branch steel-event-system helix-term --bin hx --locked")
+  echo "[✓] hx steel found: ", findExe("hx")
 
-# ── FIXED: forge install ──
+# 3. forge comes from xtask, but fallback
 if findExe("forge") == "":
-  echo "Installing forge..."
-  if run("cargo install --git https://github.com/nik-rev/forge --locked")!= 0:
-    # fallback old name
-    discard run("cargo install forge --locked")
+  discard run("cargo install --git https://github.com/nik-rev/forge --locked")
 
-for url in [
-  "https://github.com/Ra77a3l3-jar/forest.hx.git",
-  "https://github.com/gllms/streal.hx.git",
-  "https://github.com/Ra77a3l3-jar/trail.hx.git"
-]:
+# 4. Install plugins
+for url in Plugins:
   discard run("forge pkg install --git " & url)
 
+# 5. Write configs
 createDir(cfgDir)
 if isClean:
   backup(cfgDir / "config.toml")
   backup(cfgDir / "init.scm")
+  if fileExists(cfgDir / "helix.scm"): removeFile(cfgDir / "helix.scm")
 
-const configToml = """theme = "astrodark"
-[editor]
-line-number = "absolute"
-cursorline = true
-"""
+writeFile(cfgDir / "config.toml", ConfigToml)
+writeFile(cfgDir / "init.scm", InitScm)
+echo "Wrote ", cfgDir / "config.toml"
+echo "Wrote ", cfgDir / "init.scm"
 
-const initScm = """(require "forest/forest.scm")
-(forest-configure! 'left)
-(require "streal/streal.scm")
-(require "trail/trail.scm")
-"""
-
-if isClean or not fileExists(cfgDir / "config.toml"):
-  writeFile(cfgDir / "config.toml", configToml)
-if isClean or not fileExists(cfgDir / "init.scm"):
-  writeFile(cfgDir / "init.scm", initScm)
-
-echo "\nDone. Run hx"
+echo "\nDone. Run: hx"
