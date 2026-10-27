@@ -1,4 +1,4 @@
-import os, osproc, strutils, parseopt
+import os, osproc, strutils, parseopt, times
 
 var autoConfirm = false
 var verbose = false
