@@ -54,7 +54,6 @@ discard run("grep -q '.cargo/bin' ~/.zshrc 2>/dev/null || echo 'export PATH=\"$H
 let plugins = [
   "https://github.com/Ra77a3l3-jar/forest.hx.git",
   "https://github.com/mattwparas/streal.hx.git",
-  "https://github.com/mattwparas/steel-pty.git",
   "https://github.com/Ra77a3l3-jar/trail.hx.git",
   "https://github.com/HeitorAugustoLN/showkeys.hx.git"
 ]
