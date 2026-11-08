@@ -41,3 +41,14 @@ l = ":sh git log --oneline -20"
 [keys.normal.space.t]
 t = ":sh kitty >/dev/null 2>&1"
 k = ":sh pkill kitty >/dev/null 2>&1"
+
+# --- Obelisk.hx v1.2 ---
+# Space o o = open, Space o f = follow, etc.
+[keys.normal.space.o]
+o = ":obelisk-open"
+d = ":obelisk-daily"
+f = ":obelisk-follow"
+t = ":obelisk-tags"
+b = ":obelisk-backlinks"
+s = ":obelisk-search"
+n = ":obelisk-new"

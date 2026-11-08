@@ -1,5 +1,4 @@
 https://github.com/Ra77a3l3-jar/forest.hx.git
-https://github.com/gllms/streal.hx.git
-https://github.com/helix-steel/steel-pty.git
 https://github.com/Ra77a3l3-jar/trail.hx.git
-https://github.com/nik-rev/showkeys.hx.git
+https://github.com/HeitorAugustoLN/showkeys.hx.git
+https://github.com/NikoooGD/obelisk.hx.git
