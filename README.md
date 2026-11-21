@@ -4,12 +4,14 @@ Run by first cloning the [Repo](https://github.com/NikoooGD/LineHX/edit/main/) t
 Soon to be available in [Nims](https://nim-lang.org) [package manager](https://www.nimpackages.com/)
 **Windows version in testing**
 
+**Requires Cargo. You can install cargo by following the instructions at https://doc.rust-lang.org/cargo/getting-started/installation.html**
+
 **Installation**
 
  
-1. Clone
+1. Clone and change directory
 ```Bash
-git clone https://github.com/NikoooGD/LineHX
+git clone https://github.com/NikoooGD/LineHX && cd LinehX
 ```
 2. Compile
 ```Bash
@@ -18,9 +20,6 @@ nim c -d:release -o:install install.nim
 
 # For Arch Linux
 nim c -d:release -o:install install.nim
-
-# For Windows
-nim c -d:release -o:Install.exe install.nim
 ```
 3. run
 ```Bash
