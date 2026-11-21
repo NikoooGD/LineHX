@@ -4,7 +4,7 @@ Run by first cloning the [Repo](https://github.com/NikoooGD/LineHX/edit/main/) t
 Soon to be available in [Nims](https://nim-lang.org) [package manager](https://www.nimpackages.com/)
 **Windows version in testing**
 
-**Requires Cargo. You can install Cargo by following the instructions at [rust-lang.org](https://doc.rust-lang.org/cargo/getting-started/installation.html)**
+**Requires Cargo and Nim. You can install Cargo by following the instructions at [rust-lang.org](https://doc.rust-lang.org/cargo/getting-started/installation.html) and Nim is a available at [nim-lang.org](https://nim-lang.org/install.html)**
 
 **Installation**
 
